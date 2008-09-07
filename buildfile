@@ -11,7 +11,7 @@ JRUBY = 'org.jruby:jruby-complete:jar:1.1.3'
 desc 'JRuby Rack adapter'
 define 'jruby-rack' do
   project.group = 'org.jruby.rack'
-  project.version = '0.9.2-SNAPSHOT'
+  project.version = '0.9.3-SNAPSHOT'
   compile.with JRUBY,
     'org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.1',
     'org.apache.geronimo.specs:geronimo-jsp_2.0_spec:jar:1.1',
@@ -22,7 +22,7 @@ define 'jruby-rack' do
   task :unpack_gems => _("target") do |t|
     Dir.chdir(t.prerequisites.first) do
       unless File.directory?(_("target/rack"))
-        ruby "-S", "gem", "unpack", "rack"
+        ruby "-S", "gem", "unpack", "-v", "0.4.0", "rack"
         mv FileList["rack-*"].first, "rack"
       end
     end
