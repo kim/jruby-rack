@@ -10,7 +10,7 @@ module JRuby
   module Rack
     class RailsServletHelper < ServletHelper
       attr_accessor :rails_env, :rails_root
-
+ 
       def initialize(servlet_context = nil)
         super
         @rails_root = @servlet_context.getInitParameter 'rails.root'
@@ -20,6 +20,7 @@ module JRuby
         @rails_env ||= 'production'
         ENV['RAILS_ROOT'] = @rails_root
         ENV['RAILS_ENV'] = @rails_env
+        @asset_host = @servlet_context.getInitParameter 'asset.host'
         silence_warnings { Object.const_set("PUBLIC_ROOT", public_root) }
       end
 
@@ -65,6 +66,8 @@ module JRuby
             asset_tag_helper.const_set("STYLESHEETS_DIR", "#{PUBLIC_ROOT}/stylesheets")
           end
         end
+        
+        ActionController::Base.asset_host = @asset_host if @asset_host
       end
 
       def setup_sessions
@@ -137,11 +140,11 @@ module JRuby
       def call(env)
         env['rails.session_options'] = @servlet_helper.session_options_for_request(env)
         env['HTTPS'] = 'on' if env['rack.url_scheme'] == 'https'
-        relative_url_root = env['java.servlet_request'].getContextPath
-        if relative_url_root && !relative_url_root.empty?
-          env['RAILS_RELATIVE_URL_ROOT'] = relative_url_root
-          ActionController::Base.relative_url_root = relative_url_root if ActionController::Base.respond_to?(:relative_url_root=)
-        end
+        # relative_url_root = env['java.servlet_request'].getContextPath
+        # if relative_url_root && !relative_url_root.empty?
+        #   env['RAILS_RELATIVE_URL_ROOT'] = relative_url_root
+        #   ActionController::Base.relative_url_root = relative_url_root if ActionController::Base.respond_to?(:relative_url_root=)
+        # end
         @app.call(env)
       end
     end
